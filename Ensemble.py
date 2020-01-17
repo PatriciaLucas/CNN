@@ -111,18 +111,80 @@ def random_CNN3():
         2
     )
 
-def genotypeCNN(filters, pool, dropout, norm, lags, num_conv, kernel_size, pool_size, tipo):
+def genotypeCNN1(filters, pool, dropout, norm, lags, num_conv, kernel_size, pool_size, tipo):
+    """
+    Cria o genótipo para um indivíduo CNN
+    :parametro filters: número de filtros [16,32,64]
+    :parametro pool: probabilidade de pooling [0%, 50%, 100%] 
+    :parametro dropout: porcentagem dropout (0.5 a 0.8)
+    :parametro norm: normalização (0 - sim, 1 - não)
+    :parametro lags: quantidade de lags [1 - 50]
+    :parametro num_conv: número de camadas convolucionais [1 - 6]
+    :parametro kernel_size: tamanho do kernel de convolução [2,3,5,11]
+    :parametro pool_size: tamanho da janela de pooling [2,3,4,5]
+    :parametro tipo: RMSE de teste do modelo
+    :return: o genótipo, um dicionário com todos os hiperparâmetros
+    """
     ind = {
-        'filters': filters, # número de filtros [16,32,64]
-        'pool': pool, # probabilidade de pooling [0%, 50%, 100%] 
-        'dropout': dropout, # porcentagem dropout (0.5 a 0.8)
-        'norm': norm, # normalização (0 - sim, 1 - não)
-        'lags': lags, # quantidade de lags [1 - 50]
-        'num_conv': num_conv, # número de camadas convolucionais [1 - 6]
-        'kernel_size': kernel_size, # tamanho do kernel de convolução [2,3,5,11]
-        'pool_size': pool_size, #tamanho da janela de pooling [2,3,4,5] 
-        'tipo': tipo #RMSE de teste do modelo
+        'filters': filters, 
+        'pool': pool, 
+        'dropout': dropout, 
+        'norm': norm,
+        'lags': lags,
+        'num_conv': num_conv,
+        'kernel_size': kernel_size,
+        'pool_size': pool_size,
+        'tipo': tipo 
         }
+    return ind
+
+def genotypeCNN2(filters, dropout, norm, lags, num_conv, kernel_size, tipo):
+    """
+    Cria o genótipo para um indivíduo CNN2
+    :parametro filters: número de filtros [16,32,64]
+    :parametro dropout: porcentagem dropout (0 a 0.5)
+    :parametro norm: normalização (0 - sim, 1 - não)
+    :parametro lags: quantidade de lags em relação ao número de convoluções e tamanho do kernel
+    :parametro num_conv: número de camadas convolucionais [1 - 5]
+    :parametro kernel_size: tamanho do kernel de convolução [2,3,5,11]
+    :parametro tipo: RMSE de teste do modelo
+    :return: o genótipo, um dicionário com todos os hiperparâmetros
+    """
+    ind = {
+      'filters': filters,
+      'dropout': dropout, 
+      'norm': norm,
+      'lags': lags,
+      'num_conv': num_conv,
+      'kernel_size': kernel_size,
+      'tipo': tipo
+
+    }
+    return ind
+
+def genotypeCNN3(blocos, filters, dropout, norm, lags, num_conv, kernel_size, tipo):
+    """
+    Cria o genótipo para um indivíduo CNN3
+    :parametro pilhas: número de blocos [1,2]
+    :parametro filters: número de filtros [16,32,64]
+    :parametro dropout: porcentagem dropout (0 a 0.5)
+    :parametro norm: normalização (0 - sim, 1 - não)
+    :parametro lags: quantidade de lags em relação ao número de convoluções e tamanho do kernel
+    :parametro num_conv: número de camadas convolucionais [1 - 5]
+    :parametro kernel_size: tamanho do kernel de convolução [2,3,5,11]
+    :parametro tipo: RMSE de teste do modelo
+    :return: o genótipo, um dicionário com todos os hiperparâmetros
+    """
+    ind = {
+      'pilhas': blocos,
+      'filters': filters, 
+      'dropout': dropout,
+      'norm': norm,
+      'lags': lags, 
+      'num_conv': num_conv, 
+      'kernel_size': kernel_size, 
+      'tipo': tipo
+    }
     return ind
     
 def slideWindow(train, test, n_lags):
