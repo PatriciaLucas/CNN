@@ -304,7 +304,8 @@ def modelo_CNN1(X_train, y_train, individual):
         return model, history
     except Exception as ex:
         individual = random_CNN1()
-        modelo_CNN1(X_train, y_train, individual)
+        model, history = modelo_CNN1(X_train, y_train, individual)
+        return model, history
     
 def modelo_CNN2(X_train, y_train, individual):
     """
