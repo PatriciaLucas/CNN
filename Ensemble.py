@@ -282,26 +282,29 @@ def modelo_CNN1(X_train, y_train, individual):
     else:
         kernel_size = 11
     
-    #x = int(math.log(individual['lags'])/math.log(2))
-    for i in range(individual['num_conv']):
-        model.add(Conv1D(filters=filters, kernel_size=kernel_size, activation='relu', input_shape=(X_train.shape[1],1),
-                             padding='same', kernel_constraint=max_norm(3)))
-        if individual['pool'] == 0: 
-            model.add(MaxPooling1D(pool_size=individual['pool_size'], strides=2, padding='same', data_format='channels_first'))
-        elif individual['pool'] == 1:
-            rnd = random.uniform(0,1)
-            if rnd > .5:
-                model.add(MaxPooling1D(pool_size=individual['pool_size']))
-        model.add(SpatialDropout1D(round(individual['dropout'],1)))
-        if individual['norm'] == 0:
-            model.add(BatchNormalization())
+    try:
+        for i in range(individual['num_conv']):
+            model.add(Conv1D(filters=filters, kernel_size=kernel_size, activation='relu', input_shape=(X_train.shape[1],1),
+                                padding='same', kernel_constraint=max_norm(3)))
+            if individual['pool'] == 0: 
+                model.add(MaxPooling1D(pool_size=individual['pool_size'], strides=2, padding='same', data_format='channels_first'))
+            elif individual['pool'] == 1:
+                rnd = random.uniform(0,1)
+                if rnd > .5:
+                    model.add(MaxPooling1D(pool_size=individual['pool_size']))
+            model.add(SpatialDropout1D(round(individual['dropout'],1)))
+            if individual['norm'] == 0:
+                model.add(BatchNormalization())
 
-    model.add(Flatten())
-    model.add(Dense(1, activation = 'linear'))
-    model.compile(loss='mse', optimizer='Adam')
-    history = model.fit(X_train, y_train, epochs = 100, verbose=0, batch_size = filters, callbacks = call)
-    
-    return model, history
+        model.add(Flatten())
+        model.add(Dense(1, activation = 'linear'))
+        model.compile(loss='mse', optimizer='Adam')
+        history = model.fit(X_train, y_train, epochs = 100, verbose=0, batch_size = filters, callbacks = call)
+        
+        return model, history
+    except Exception as ex:
+        individual = random_CNN1()
+        modelo_CNN1(X_train, y_train, individual)
     
 def modelo_CNN2(X_train, y_train, individual):
     """
