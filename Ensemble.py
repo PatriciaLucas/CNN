@@ -32,7 +32,7 @@ from IPython import display
 from matplotlib import pyplot as plt
 import seaborn
 
-def random_CNN():
+def random_CNN1():
     lags = random.randint(1, 50)   # quantidade de lags
     if lags <= 2:
         max_pool = 2
