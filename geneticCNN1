@@ -186,7 +186,7 @@ def elitism(population, new_population):
 
     return new_population
 
-def genetico(ngen, npop, pcruz, pmut):
+def genetico(ngen, npop, pcruz, pmut, dataset):
     """
     Executa o AG
     :parametro ngen: número de gerações
@@ -204,7 +204,7 @@ def genetico(ngen, npop, pcruz, pmut):
     melhor_len_lags = []
     media_len_lags = []
 
-    res = list(map(evaluation, populacao))
+    res = list(map(evaluation(dataset), populacao))
     for i in range(len(res)):
         populacao[i]['num_param'],populacao[i]['rmse'] = res[i]
 
