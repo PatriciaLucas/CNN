@@ -31,6 +31,7 @@ import pylab as pl
 from IPython import display
 from matplotlib import pyplot as plt
 import seaborn
+from CNN import basic
 
 def random_CNN1():
     lags = random.randint(1, 50)   # quantidade de lags
@@ -401,20 +402,20 @@ def get_models(n, t):
     models = []
     if n == 0:
         for i in range(t):
-            models.append(random_CNN1())
+            models.append(basic.random_CNN1())
     elif n == 1:
         for i in range(t):
-            models.append(random_CNN2())
+            models.append(basic.random_CNN2())
     elif n == 2:
         for i in range(t):
-            models.append(random_CNN3())
+            models.append(basic.random_CNN3())
     elif n == 3:
         for i in range(2):
-            models.append(random_CNN1())
+            models.append(basic.random_CNN1())
         for i in range(2):
-            models.append(random_CNN2())
+            models.append(basic.random_CNN2())
         for i in range(2):
-            models.append(random_CNN3())
+            models.append(basic.random_CNN3())
     return models
     
 def get_dados(models, series_treino, series_teste):
@@ -439,14 +440,14 @@ def executa_models(models, train, test):
     yhats = []
     for i in range(len(models)):
         series_treino, series_teste, scaler = get_dados(models[i], train, test)
-        X_train, y_train, X_test, y_test = slideWindow(series_treino, series_teste, models[i]['lags'])
+        X_train, y_train, X_test, y_test = basic.slideWindow(series_treino, series_teste, models[i]['lags'])
         if models[i]['tipo'] == 0:
-            model, history = modelo_CNN1(X_train, y_train, models[i])
+            model, history = basic.modelo_CNN1(X_train, y_train, models[i])
         elif models[i]['tipo'] == 1:
-            model = modelo_CNN2(X_train, y_train, models[i])
+            model = basic.modelo_CNN2(X_train, y_train, models[i])
         else:
-            model, history = modelo_CNN3(X_train, y_train, models[i])
-        rmse, yhat, y_test = predictModel(series_teste, model, 10,  models[i]['lags'], scaler)
+            model, history = basic.modelo_CNN3(X_train, y_train, models[i])
+        rmse, yhat, y_test = basic.predictModel(series_teste, model, 10,  models[i]['lags'], scaler)
         yhats.append(yhat)
     return yhats, y_test
     
