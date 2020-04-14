@@ -345,8 +345,8 @@ def modelo_CNN2(X_train, y_train, individual):
     model.add(Flatten())
     model.add(Dense(1))
     model.compile(loss='mse', optimizer='Adam')
-    model.fit(X_train, y_train, epochs = 60, verbose=0, batch_size = filters, callbacks = call)          
-    return model
+    history = model.fit(X_train, y_train, epochs = 60, verbose=0, batch_size = filters, callbacks = call)          
+    return model, history
     
 def slideWindow_val(series, n_lags):
     """
