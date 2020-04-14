@@ -86,7 +86,7 @@ def executa_models(models, train, test):
         if models[i]['tipo'] == 0:
             model, history = basic.modelo_CNN1(X_train, y_train, models[i])
         elif models[i]['tipo'] == 1:
-            model = basic.modelo_CNN2(X_train, y_train, models[i])
+            model, history = basic.modelo_CNN2(X_train, y_train, models[i])
         else:
             model, history = basic.modelo_CNN3(X_train, y_train, models[i])
         rmse, yhat, y_test = basic.predictModel(series_teste, model, 10,  models[i]['lags'], scaler)
