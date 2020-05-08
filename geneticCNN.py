@@ -9,6 +9,7 @@ from operator import itemgetter
 import statsmodels
 from statsmodels.tsa.stattools import acf
 from statsmodels.stats.diagnostic import acorr_ljungbox
+from itertools import repeat
 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error, mean_absolute_error
