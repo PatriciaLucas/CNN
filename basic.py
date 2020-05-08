@@ -122,7 +122,7 @@ def genotypeCNN1(filters, pool, dropout, norm, lags, num_conv, kernel_size, pool
     :parametro num_conv: número de camadas convolucionais [1 - 6]
     :parametro kernel_size: tamanho do kernel de convolução [2,3,5,11]
     :parametro pool_size: tamanho da janela de pooling [2,3,4,5]
-    :parametro tipo: RMSE de teste do modelo
+    :parametro tipo: tipo de ensemble (0-CNN1, 1-CNN2, 2-CNN3, 3-Híbrido)
     :return: o genótipo, um dicionário com todos os hiperparâmetros
     """
     ind = {
@@ -147,7 +147,7 @@ def genotypeCNN2(filters, dropout, norm, lags, num_conv, kernel_size, tipo):
     :parametro lags: quantidade de lags em relação ao número de convoluções e tamanho do kernel
     :parametro num_conv: número de camadas convolucionais [1 - 5]
     :parametro kernel_size: tamanho do kernel de convolução [2,3,5,11]
-    :parametro tipo: RMSE de teste do modelo
+    :parametro tipo: tipo de ensemble (0-CNN1, 1-CNN2, 2-CNN3, 3-Híbrido)
     :return: o genótipo, um dicionário com todos os hiperparâmetros
     """
     ind = {
@@ -172,7 +172,7 @@ def genotypeCNN3(blocos, filters, dropout, norm, lags, num_conv, kernel_size, ti
     :parametro lags: quantidade de lags em relação ao número de convoluções e tamanho do kernel
     :parametro num_conv: número de camadas convolucionais [1 - 5]
     :parametro kernel_size: tamanho do kernel de convolução [2,3,5,11]
-    :parametro tipo: RMSE de teste do modelo
+    :parametro tipo: tipo de ensemble (0-CNN1, 1-CNN2, 2-CNN3, 3-Híbrido)
     :return: o genótipo, um dicionário com todos os hiperparâmetros
     """
     ind = {
