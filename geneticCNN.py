@@ -91,7 +91,7 @@ def evaluation(individual, cnn, series):
             model, history  = basic.modelo_CNN2(X_train, y_train, individual)
         else:
             model, history  = basic.modelo_CNN3(X_train, y_train, individual)
-
+        print(history.history)
         results.append(np.sqrt(history.history['val_loss'][-1]))
         i = i+d
 
