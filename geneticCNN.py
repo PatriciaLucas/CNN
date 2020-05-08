@@ -86,11 +86,11 @@ def evaluation(individual, cnn, series):
         X_train, y_train, X_test, y_test = basic.slideWindow(train, test, individual['lags'])
         
         if cnn == 'CNN1':
-            model, history  = basic.modelo_CNN1(X_train, y_train, X_test, y_test, individual)
+            model, history  = basic.modelo_CNN1(X_train, y_train, individual)
         elif cnn == 'CNN2':
-            model, history  = basic.modelo_CNN2(X_train, y_train, X_test, y_test, individual)
+            model, history  = basic.modelo_CNN2(X_train, y_train, individual)
         else:
-            model, history  = basic.modelo_CNN3(X_train, y_train, X_test, y_test, individual)
+            model, history  = basic.modelo_CNN3(X_train, y_train, individual)
 
         results.append(np.sqrt(history.history['val_loss'][-1]))
         i = i+d
