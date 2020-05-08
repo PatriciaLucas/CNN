@@ -43,14 +43,267 @@ def initial_population(n, cnn):
     pop = []
     for i in range(n):
         if cnn == 'CNN1':
-            pop.append(basic.random_CNN1())
+            pop.append(random_CNN1())
         elif cnn == 'CNN2':
-            pop.append(basic.random_CNN2())
+            pop.append(random_CNN2())
         else:
-            pop.append(basic.random_CNN3())
+            pop.append(random_CNN3())
     return pop
+
+def random_CNN1(): 
+  return genotypeCNN1(
+    random.randint(0, 2),   # número de filtros [16,32,64,128]
+    random.randint(0, 2),   # probabilidade de pooling [0%, 50%, 100%]
+    random.randint(2, 5), #tamanho da janela de pooling [2,3,4,5] 
+    random.uniform(0.5, 0.8),  # porcentagem dropout
+    random.randint(0, 1),   # normalização (0 - sim, 1 - não)
+    random.randint(2, 200),   # quantidade de lags
+    random.randint(1, 6), # número de camadas convolucionais
+    random.randint(0, 3), # tamanho do kernel de convolução
+    [], #RMSE de teste do modelo
+    []  #número de parâmetros do modelo
+  )
+
+def random_CNN2():
+  num_conv = random.randint(1, 6) # número de camadas convolucionais
+  k = random.randint(0, 3) # tamanho do kernel de convolução
+  
+  if k == 0: 
+    kernel_size = 2
+  elif k == 1:
+    kernel_size = 3
+  elif k == 2:
+    kernel_size = 5
+  else:
+    kernel_size = 11
     
-def evaluation(individual, cnn, series):
+  max_lags = (2**num_conv)*kernel_size
+  min_lags = (2**num_conv)
+  
+  return genotypeCNN2(
+    random.randint(0, 2),   # número de filtros [16,32,64,128]
+    random.uniform(0, 0.5),  # porcentagem de dropout [0.5..0.8]
+    random.randint(0, 1),   # normalização (0 - sim, 1 - não)
+    random.randint(min_lags, max_lags),   # quantidade de lags
+    num_conv,
+    kernel_size,
+    [], #RMSE de teste do modelo
+    []  #número de parâmetros do modelo
+  )
+
+def random_CNN3():
+  num_conv = random.randint(1, 6) # número de camadas convolucionais
+  k = random.randint(0, 3) # tamanho do kernel de convolução
+  pilhas = random.randint(1, 3) #número de blocos [1,2,3]
+  if k == 0: 
+    kernel_size = 2
+  elif k == 1:
+    kernel_size = 3
+  elif k == 2:
+    kernel_size = 5
+  else:
+    kernel_size = 11
+    
+  max_lags = ((2**num_conv)*kernel_size)*pilhas
+  min_lags = (2**num_conv)*kernel_size
+  
+  return genotypeCNN3(
+    pilhas,
+    random.randint(0, 2),   # número de filtros [16,32,64]
+    random.uniform(0, 0.5),  # porcentagem dropout
+    random.randint(0, 1),   # normalização (0 - sim, 1 - não)
+    random.randint(min_lags, max_lags),   # quantidade de lags
+    num_conv,
+    kernel_size,
+    [], #RMSE de teste do modelo
+    []  #número de parâmetros do modelo
+  )
+
+def genotypeCNN1(filters, pool, pool_size, dropout, norm, lags, num_conv, kernel_size, rmse, num_param):
+  ind = {
+      'filters': filters, # número de filtros [16,32,64]
+      'pool': pool, # probabilidade de pooling [0%, 50%, 100%] 
+      'pool_size': pool_size, #tamanho da janela de pooling [2,3,4,5] 
+      'dropout': dropout, # porcentagem dropout (0.5 a 0.8)
+      'norm': norm, # normalização (0 - sim, 1 - não)
+      'lags': lags, # quantidade de lags [2 - 200]
+      'num_conv': num_conv, # número de camadas convolucionais [1 - 6]
+      'kernel_size': kernel_size, # tamanho do kernel de convolução [2,3,5,11]
+      'rmse': rmse, #RMSE de teste do modelo
+      'num_param':num_param   #número de parâmetros do modelo
+
+  }
+  return ind
+
+def genotypeCNN2(filters, dropout, norm, lags, num_conv, kernel_size, rmse, num_param):
+  ind = {
+      'filters': filters, # número de filtros [16,32,64]
+      'dropout': dropout, # porcentagem de dropout [0.5..0.8]
+      'norm': norm, # normalização (0 - sim, 1 - não)
+      'lags': lags, # quantidade de lags em relação ao número de convoluções e tamanho do kernel
+      'num_conv': num_conv, # número de camadas convolucionais
+      'kernel_size': kernel_size, # tamanho do kernel de convolução [2,3,5,11]
+      'rmse': rmse, #RMSE de teste do modelo
+      'num_param':num_param   #número de parâmetros do modelo
+
+  }
+  return ind
+
+def genotypeCNN3(blocos, filters, dropout, norm, lags, num_conv, kernel_size, rmse, num_param):
+  ind = {
+      'pilhas': blocos, #número de blocos [1,2,3]
+      'filters': filters, # número de filtros [16,32,64]
+      'dropout': dropout, # porcentagem dropout [0.5...0.8]
+      'norm': norm, # normalização (0 - sim, 1 - não)
+      'lags': lags, # quantidade de lags em relação ao número de convoluções e tamanho do kernel
+      'num_conv': num_conv, # número de camadas convolucionais
+      'kernel_size': kernel_size, # tamanho do kernel de convolução [2,3,5,11]
+      'rmse': rmse, #RMSE de teste do modelo
+      'num_param':num_param   #número de parâmetros do modelo
+
+  }
+  return ind
+
+def modelo_CNN1(X_train, y_train, X_test, y_test, individual, epocas):
+    """
+    Cria um modelo CNN1
+    :parametro X_train: dados para treinamento
+    :parametro y_train: rótulo dos dados de treinamento
+    :parametro individual: dicionário com os hiperparâmetros do modelo
+    :return: o modelo
+    """
+    warnings.filterwarnings('ignore')
+    call = [EarlyStopping(monitor='loss', mode='min', patience=15, verbose=1),]
+    model = Sequential()
+  
+    if individual['filters'] == 0: 
+        filters = 16
+    elif individual['filters'] == 1:
+        filters = 32
+    else:
+        filters = 64
+  
+    if individual['kernel_size'] == 0: 
+        kernel_size = 2
+    elif individual['kernel_size'] == 1:
+        kernel_size = 3
+    elif individual['kernel_size'] == 2:
+        kernel_size = 5
+    else:
+        kernel_size = 11
+    
+    try:
+        for i in range(individual['num_conv']):
+            model.add(Conv1D(filters=filters, kernel_size=kernel_size, activation='relu', input_shape=(X_train.shape[1],1),
+                                padding='same', kernel_constraint=max_norm(3)))
+            if individual['pool'] == 0: 
+                model.add(MaxPooling1D(pool_size=individual['pool_size'], strides=2, padding='same', data_format='channels_first'))
+            elif individual['pool'] == 1:
+                rnd = random.uniform(0,1)
+                if rnd > .5:
+                    model.add(MaxPooling1D(pool_size=individual['pool_size']))
+            model.add(SpatialDropout1D(round(individual['dropout'],1)))
+            if individual['norm'] == 0:
+                model.add(BatchNormalization())
+
+        model.add(Flatten())
+        model.add(Dense(1, activation = 'linear'))
+        model.compile(loss='mse', optimizer='Adam')
+        history = model.fit(X_train, y_train, epochs = epocas, verbose=0, batch_size = filters, validation_data=(X_test, y_test), callbacks = call)
+        
+        return model, history
+    except Exception as ex:
+        individual = basic.random_CNN1()
+        model, history = modelo_CNN1(X_train, y_train, X_test, y_test, individual)
+        return model, history
+
+def modelo_CNN2(X_train, y_train, X_test, y_test, individual, epocas):
+    """
+    Cria um modelo CNN2
+    :parametro X_train: dados para treinamento
+    :parametro y_train: rótulo dos dados de treinamento
+    :parametro individual: dicionário com os hiperparâmetros do modelo
+    :return: o modelo
+    """
+    warnings.filterwarnings('ignore')
+    model = Sequential()
+    call = [EarlyStopping(monitor='loss', mode='min', patience=15, verbose=1),]
+    if individual['filters'] == 0: 
+        filters = 16
+    elif individual['filters'] == 1:
+        filters = 32
+    else:
+        filters = 64
+  
+    if individual['kernel_size'] == 0: 
+        kernel_size = 2
+    elif individual['kernel_size'] == 1:
+        kernel_size = 3
+    elif individual['kernel_size'] == 2:
+        kernel_size = 5
+    else:
+        kernel_size = 11
+    
+    for i in range(individual['num_conv']):
+        d = 2**i
+        model.add(Conv1D(filters=filters, kernel_size=kernel_size, activation='relu', input_shape=(X_train.shape[1],1),
+                             padding='causal',dilation_rate = d, kernel_constraint=max_norm(3)))
+        model.add(SpatialDropout1D(round(individual['dropout'],1)))
+        if individual['norm'] == 0:
+            model.add(BatchNormalization())
+
+    model.add(Flatten())
+    model.add(Dense(1))
+    model.compile(loss='mse', optimizer='Adam')
+    history = model.fit(X_train, y_train, epochs = epocas, verbose=0, batch_size = filters, validation_data=(X_test, y_test), callbacks = call)          
+    return model, history
+
+def modelo_CNN3(X_train, y_train, X_test, y_test, individual,epocas):
+    """
+    Cria um modelo CNN3
+    :parametro X_train: dados para treinamento
+    :parametro y_train: rótulo dos dados de treinamento
+    :parametro individual: dicionário com os hiperparâmetros do modelo
+    :return: o modelo
+    """
+    warnings.filterwarnings('ignore')
+    call = [EarlyStopping(monitor='loss', mode='min', patience=15, verbose=1),]
+    if individual['filters'] == 0: 
+        filters = 16
+    elif individual['filters'] == 1:
+        filters = 32
+    else:
+        filters = 64
+    
+    if individual['norm'] == 0:
+        norm = False
+    else:
+        norm = True
+  
+    if individual['kernel_size'] == 0: 
+        kernel_size = 2
+    elif individual['kernel_size'] == 1:
+        kernel_size = 3
+    elif individual['kernel_size'] == 2:
+        kernel_size = 5
+    else:
+        kernel_size = 11
+    
+    d = []
+    for i in range(individual['num_conv']):
+        d.append(2**i)
+    i = Input(batch_shape=(None,X_train.shape[1],1))
+    o = TCN(nb_filters=filters, kernel_size=kernel_size, nb_stacks=individual['pilhas'], dilations=d,
+    padding='causal', use_skip_connections=False, dropout_rate=individual['dropout'], return_sequences=False, name='tcn')(i)
+        
+    o = Dense(1)(o)
+    model = Model(inputs=[i], outputs=[o])
+    model.compile(optimizer='Adam', loss='mse')  
+    history = model.fit(X_train, y_train, epochs = epocas, verbose=0, batch_size = filters, validation_data=(X_test, y_test), callbacks = call)      
+  
+    return model, history
+
+def evaluation(individual, cnn, series, epocas):
     """
     Avalia os indivíduos da população
     :parametro individual: indivíduo da população
@@ -67,7 +320,6 @@ def evaluation(individual, cnn, series):
     X_test = []
     y_test = []
     i=0
-
   
     if individual['filters'] == 0: 
         filters = 16
@@ -86,12 +338,11 @@ def evaluation(individual, cnn, series):
         X_train, y_train, X_test, y_test = basic.slideWindow(train, test, individual['lags'])
         
         if cnn == 'CNN1':
-            model, history  = basic.modelo_CNN1(X_train, y_train, individual)
+            model, history  = modelo_CNN1(X_train, y_train, X_test, y_test, individual, epocas)
         elif cnn == 'CNN2':
-            model, history  = basic.modelo_CNN2(X_train, y_train, individual)
+            model, history  = modelo_CNN2(X_train, y_train, X_test, y_test, individual, epocas)
         else:
-            model, history  = basic.modelo_CNN3(X_train, y_train, individual)
-        print(history.history)
+            model, history  = modelo_CNN3(X_train, y_train, X_test, y_test, individual, epocas)
         results.append(np.sqrt(history.history['val_loss'][-1]))
         i = i+d
 
@@ -99,7 +350,7 @@ def evaluation(individual, cnn, series):
     num_param = model.count_params()
       
     return num_param, rmse
-    
+
 def tournament(population, objective):
     """
     Seleção de indivíduos por torneio duplo passo 2
@@ -122,7 +373,7 @@ def selection(population):
     finalista = tournament([pai1, pai2], 'num_param')
 
     return finalista
-    
+
 def crossover_CNN1(pais):
     """
     Cruzamento
@@ -161,8 +412,7 @@ def crossover_CNN1(pais):
 
     rmse = []
     num_param = []
-
-    filho = basic.genotypeCNN1(filters, pool, pool_size, dropout, norm, lags, num_conv, kernel_size, rmse, num_param)
+    filho = genotypeCNN1(filters, pool, pool_size, dropout, norm, lags, num_conv, kernel_size, rmse, num_param)
 
     return filho
     
@@ -206,7 +456,7 @@ def crossover_CNN2(pais):
     rmse = []
     num_param = []
     
-    filho = genotype(filters, dropout, norm, lags, num_conv, kernel_size, rmse, num_param)
+    filho = genotypeCNN2(filters, dropout, norm, lags, num_conv, kernel_size, rmse, num_param)
   
     return filho
 
@@ -226,7 +476,7 @@ def crossover_CNN3(pais):
     dropout = float(.7*best['dropout'] + .3*worst['dropout'])
   
     rnd = random.uniform(0,1)
-    blocos = best['blocos'] if rnd < .7 else worst['blocos']
+    pilhas = best['pilhas'] if rnd < .7 else worst['pilhas']
   
     rnd = random.uniform(0,1)
     norm = best['norm'] if rnd < .7 else worst['norm']
@@ -248,15 +498,15 @@ def crossover_CNN3(pais):
         k = 5
     else:
         k = 11
-    lags = random.randint((2**num_conv)*k,(2**num_conv)*k*blocos)
+    lags = random.randint((2**num_conv)*k,(2**num_conv)*k*pilhas)
     
     rmse = []
     num_param = []
     
-    filho = genotype(blocos, filters, dropout, norm, lags, num_conv, kernel_size, rmse, num_param)
+    filho = genotypeCNN3(pilhas, filters, dropout, norm, lags, num_conv, kernel_size, rmse, num_param)
   
     return filho
-    
+
 def mutation_CNN1(individual):
     """
     Mutação
@@ -304,7 +554,7 @@ def mutation_CNN3(individual):
     :parametro individual: indivíduo que sofrerá a mutação
     :return: individuo mutado
     """
-    individual['blocos'] = min(2, max(1,int(individual['blocos'] + np.random.normal(0,1))))
+    individual['pilhas'] = min(2, max(1,int(individual['pilhas'] + np.random.normal(0,1))))
     individual['dropout'] = min(1, max(0,individual['dropout'] + np.random.normal(0,.1)))
     individual['num_conv'] = min(5, max(1,int(individual['num_conv'] + np.random.normal(0,1))))
     individual['norm'] = random.randint(0,1)
@@ -318,10 +568,10 @@ def mutation_CNN3(individual):
         kernel_size = 5
     else:
         kernel_size = 11
-    individual['lags'] = random.randint((2**individual['num_conv'])*kernel_size,(2**individual['num_conv'])*kernel_size*individual['blocos'])
+    individual['lags'] = random.randint((2**individual['num_conv'])*kernel_size,(2**individual['num_conv'])*kernel_size*individual['pilhas'])
   
     return individual
-    
+
 def elitism(population, new_population):
     """
     Inseri o melhor indivíduo da população na nova população e exclui o pior
@@ -336,7 +586,7 @@ def elitism(population, new_population):
 
     return new_population
 
-def genetic(ngen, npop, pcruz, pmut, dataset, cnn):
+def genetic(ngen, npop, pcruz, pmut, dataset, cnn, epocas):
     """
     Executa o AG
     :parametro ngen: número de gerações
@@ -355,7 +605,7 @@ def genetic(ngen, npop, pcruz, pmut, dataset, cnn):
     melhor_len_lags = []
     media_len_lags = []
 
-    res = list(map(evaluation, populacao, repeat(cnn), repeat(dataset)))
+    res = list(map(evaluation, populacao, repeat(cnn), repeat(dataset), repeat(epocas)))
     for i in range(len(res)):
         populacao[i]['num_param'],populacao[i]['rmse'] = res[i]
 
@@ -393,7 +643,7 @@ def genetic(ngen, npop, pcruz, pmut, dataset, cnn):
             new_populacao.append(filho11)
             new_populacao.append(filho22)
       
-        res = list(map(evaluation, populacao, repeat(cnn), repeat(dataset)))
+        res = list(map(evaluation, populacao, repeat(cnn), repeat(dataset), repeat(epocas)))
         for i in range(len(res)):
             new_populacao[i]['num_param'],new_populacao[i]['rmse'] = res[i]
 
