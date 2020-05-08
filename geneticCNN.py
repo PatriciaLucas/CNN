@@ -33,7 +33,7 @@ from matplotlib import pyplot as plt
 import seaborn
 from CNN import basic
 
-def initial_population(n):
+def initial_population(n, cnn):
     """
     Gera a população
     :parametro n: número de indivíduos da população
@@ -41,7 +41,6 @@ def initial_population(n):
     """
     pop = []
     for i in range(n):
-        pop.append(random_genotype())
         if cnn == 'CNN1':
             pop.append(basic.random_CNN1())
         elif cnn == 'CNN2':
@@ -349,7 +348,7 @@ def genetic(ngen, npop, pcruz, pmut, dataset, cnn):
     fig.set_size_inches(15, 5)
     fig, ax = plt.subplots(nrows=1, ncols=1,figsize=[15,5])
     new_populacao = []
-    populacao = initial_population(npop)
+    populacao = initial_population(npop, cnn)
     melhor_rmse = []
     media_rmse = []
     melhor_len_lags = []
