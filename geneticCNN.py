@@ -40,8 +40,14 @@ def initial_population(n):
     :return: população
     """
     pop = []
-    for i in range(n): 
+    for i in range(n):
         pop.append(random_genotype())
+        if cnn == 'CNN1':
+            pop.append(basic.random_CNN1())
+        elif cnn == 'CNN2':
+            pop.append(basic.random_CNN2())
+        else:
+            pop.append(basic.random_CNN3())
     return pop
     
 def evaluation(individual, cnn, series):
