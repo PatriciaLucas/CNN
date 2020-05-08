@@ -83,7 +83,7 @@ def evaluation(individual, cnn, series):
         test_index = (series[i+int(w*train_size):w+i].index.values.astype(int))
         train = series[train_index].values
         test = series[test_index].values
-        X_train, y_train, X_test, y_test = slideWindow(train, test, individual['lags'])
+        X_train, y_train, X_test, y_test = basic.slideWindow(train, test, individual['lags'])
         
         if cnn == 'CNN1':
             model, history  = basic.modelo_CNN1(X_train, y_train, X_test, y_test, individual)
