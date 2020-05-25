@@ -52,7 +52,6 @@ class Ensemble_CNN:
     Search the hyperparameters of the models chosen to compose the ensemble
 
     """
-    #models = []
     if self.type_models == 'CNN1':
         for i in range(self.number):
             self.models.append(basic.random_CNN1())
@@ -78,14 +77,6 @@ class Ensemble_CNN:
     :parameter test: test database
     """
     test = data[max_lag-self.models[i]['lags']:]
-    #if minmax:
-     # train = train.reshape(-1, 1)
-      #test = test.reshape(-1, 1)
-     # scaler = MinMaxScaler()
-     # train = scaler.fit_transform(train)
-     # test = scaler.fit_transform(test)
-    #else:
-     # scaler = False
     return test
   
   def slideWindow(self, data, n_lags):
@@ -103,7 +94,7 @@ class Ensemble_CNN:
     X = np.reshape(X,(X.shape[0],X.shape[1],1))
     return X, y
 
-  def fit(self, train, probabilistic_forecast):
+  def fit(self, train):
     """
     Run the ensemble models
     :parameter train: training database
@@ -111,9 +102,7 @@ class Ensemble_CNN:
     """
     yhats = []
     for i in range(len(self.models)):
-        #train, test = self.get_data(data, test_size, i)
         X_train, y_train = self.slideWindow(train, self.models[i]['lags'])
-        #X_test, y_test = self.slideWindow(test, self.models[i]['lags'])
         if self.models[i]['tipo'] == 0:
             model, history = basic.modelo_CNN1(X_train, y_train, self.models[i])
         elif models[i]['tipo'] == 1:
@@ -122,8 +111,6 @@ class Ensemble_CNN:
             model, history = basic.modelo_CNN3(X_train, y_train, self.models[i])
         self.trained_models.append(model)
     pass
-
-#rmse, yhat, y_test = basic.predictModel(series_teste, model, 10,  models[i]['lags'], scaler)
 
   def get_maxlag(self):
     l = []
@@ -157,21 +144,14 @@ class Ensemble_CNN:
     :parameter test: test database
     :parameter forecast_horizon: number of forecasts ahead
     """
-    #X_test, y_test = basic.slideWindow_val(test, self.models[i]['lags'])
     X_test, y_test = self.slideWindow(test, self.models[z]['lags'])
     yhat = np.zeros((y_test.shape[0],forecast_horizon))
-    #rmse = []
-    #mape = []
     for i in range(len(X_test)):
         X = X_test[i,:,0].reshape((1, X_test.shape[1], X_test.shape[2]))
         for j in range(forecast_horizon):
             yhat[i,j] = self.trained_models[z].predict(X, verbose=0)
             X = np.insert(X,self.models[z]['lags'],yhat[i,j],axis=1) 
             X = np.delete(X,0,axis=1)
-    #yhat = scaler.inverse_transform(yhat)
-    #y_test = scaler.inverse_transform(y_test)
-    #for i in range(n_previsoes):
-        #rmse.append(np.sqrt(mean_squared_error(yhat[:,i],y_test[:])))
     return yhat, y_test#, rmse
 
   def probabilistic_forecast(self, test, forecast_horizon):
@@ -264,5 +244,4 @@ class Ensemble_CNN:
         rmse.append(np.sqrt(mean_squared_error(yhat[:,i],y_test[:])))
         mae.append(mean_absolute_error(yhat[:,i],y_test[:]))
         mape.append(np.mean(np.abs((yhat[:,i] - y_test[:]) / y_test[:])) * 100)
-    #print(tabulate([[rmse,mae,mape]], headers=['RMSE', 'MAE', 'MAPE']))
     return rmse, mae, mape
