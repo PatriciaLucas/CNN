@@ -94,7 +94,7 @@ class Ensemble_CNN:
     X = np.reshape(X,(X.shape[0],X.shape[1],1))
     return X, y
 
-  def fit(self, train):
+  def fit(self, data):
     """
     Run the ensemble models
     :parameter train: training database
@@ -102,7 +102,7 @@ class Ensemble_CNN:
     """
     yhats = []
     for i in range(len(self.models)):
-        X_train, y_train = self.slideWindow(train, self.models[i]['lags'])
+        X_train, y_train = self.slideWindow(data, self.models[i]['lags'])
         if self.models[i]['tipo'] == 0:
             model, history = basic.modelo_CNN1(X_train, y_train, self.models[i])
         elif models[i]['tipo'] == 1:
@@ -154,13 +154,13 @@ class Ensemble_CNN:
             X = np.delete(X,0,axis=1)
     return yhat, y_test#, rmse
 
-  def probabilistic_forecast(self, test, forecast_horizon):
+  def probabilistic_forecast(self, data, forecast_horizon):
     """
     Gera distribuição de probabilidade das previsões dos modelos que compõem o ensemble
     :parametro yhats: valores previstos
     :return: distribuição de probabilidade
     """
-    mean, y_test, yhats = self.point_forecast(test, forecast_horizon)
+    mean, y_test, yhats = self.point_forecast(data, forecast_horizon)
     y, ys, yss, kde_l, kde_list = [], [], [], [], []
     for z in range(yhats[0].shape[1]):
         for j in range(yhats[0].shape[0]):
