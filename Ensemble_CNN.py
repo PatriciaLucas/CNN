@@ -105,7 +105,7 @@ class Ensemble_CNN:
         X_train, y_train = self.slideWindow(data, self.models[i]['lags'])
         if self.models[i]['tipo'] == 0:
             model, history = basic.modelo_CNN1(X_train, y_train, self.models[i])
-        elif models[i]['tipo'] == 1:
+        elif self.models[i]['tipo'] == 1:
             model, history = basic.modelo_CNN2(X_train, y_train, self.models[i])
         else:
             model, history = basic.modelo_CNN3(X_train, y_train, self.models[i])
