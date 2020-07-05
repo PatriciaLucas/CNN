@@ -7,14 +7,13 @@ import random
 import math
 from operator import itemgetter
 import statsmodels
-from statsmodels.tsa.stattools import acf
-from statsmodels.stats.diagnostic import acorr_ljungbox
 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KernelDensity
+import hickle as hkl
 
 import tensorflow as tf
 from tensorflow import keras
@@ -27,10 +26,6 @@ from keras.callbacks import EarlyStopping
 from tcn import TCN
 from tcn import compiled_tcn
 
-import pylab as pl
-from IPython import display
-from matplotlib import pyplot as plt
-import seaborn
 from CNN import basic
 
 class Ensemble_CNN:
@@ -204,7 +199,6 @@ class Ensemble_CNN:
     return obj
   
   def save_ensemble(self, file, file_name):
-    import hickle as hkl
     hkl.dump(file, file_name)
     pass
 
@@ -236,7 +230,6 @@ class Ensemble_CNN:
     return kde_list
 
   def metrics(self, yhat, y_test, forecast_horizon):
-    from tabulate import tabulate
     rmse = []
     mae = []
     mape = []
