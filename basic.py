@@ -7,8 +7,6 @@ import random
 import math
 from operator import itemgetter
 import statsmodels
-from statsmodels.tsa.stattools import acf
-from statsmodels.stats.diagnostic import acorr_ljungbox
 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error, mean_absolute_error
@@ -26,11 +24,6 @@ from keras.optimizers import Adam, SGD
 from keras.callbacks import EarlyStopping
 from tcn import TCN
 from tcn import compiled_tcn
-
-import pylab as pl
-from IPython import display
-from matplotlib import pyplot as plt
-import seaborn
 
 def random_CNN1():
     lags = random.randint(1, 50)   # quantidade de lags
