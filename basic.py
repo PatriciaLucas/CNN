@@ -243,7 +243,7 @@ def modelo_CNN3(X_train, y_train, individual):
     o = Dense(1)(o)
     model = Model(inputs=[i], outputs=[o])
     model.compile(optimizer='Adam', loss='mse')  
-    history = model.fit(X_train, y_train, epochs = 50, verbose=0, batch_size = filters, callbacks = call)      
+    history = model.fit(X_train, y_train, epochs = 30, verbose=0, batch_size = filters, callbacks = call)      
   
     return model, history
 
