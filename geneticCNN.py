@@ -210,7 +210,7 @@ def genotypeCNN1(filters, pool, pool_size, dropout, norm, lags, num_conv, kernel
       'filters': filters, # número de filtros [16,32,64]
       'pool': pool, # probabilidade de pooling [0%, 50%, 100%] 
       'pool_size': pool_size, #tamanho da janela de pooling [2,3,4,5] 
-      'dropout': dropout, # porcentagem dropout (0.5 a 0.8)
+      'dropout': dropout, # porcentagem dropout (0 a 0.5)
       'norm': norm, # normalização (0 - sim, 1 - não)
       'lags': lags, # quantidade de lags [2 - 200]
       'num_conv': num_conv, # número de camadas convolucionais [1 - 6]
@@ -798,10 +798,15 @@ def genetic(ngen, npop, pcruz, pmut, dataset, cnn, epocas):
         new_populacao = []
     
         pl.subplot(121)
-        h1, = pl.plot(melhor_rmse, c='blue', label='Best RMSE')
-        h2, = pl.plot(media_rmse, c='cyan', label='Mean RMSE')
-        pl.title("RMSE")
-        pl.legend([h1, h2],['Best','Mean'])
+        if cnn == 'CNN4':
+          h1, = pl.plot(melhor_rmse, c='blue', label='Best ACC')
+          h2, = pl.plot(media_rmse, c='cyan', label='Mean ACC')
+          pl.title("ACC")
+        else:
+          h1, = pl.plot(melhor_rmse, c='blue', label='Best RMSE')
+          h2, = pl.plot(media_rmse, c='cyan', label='Mean RMSE')
+          pl.title("RMSE")
+          pl.legend([h1, h2],['Best','Mean'])
 
         pl.subplot(122)
         h3, = pl.plot(melhor_len_lags, c='red', label='Best Número de parâmetros')
