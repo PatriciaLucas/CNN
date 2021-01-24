@@ -16,8 +16,6 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KernelDensity
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelBinarizer
 
 import tensorflow as tf
 from tensorflow import keras
@@ -33,92 +31,8 @@ from tcn import compiled_tcn
 import pylab as pl
 from IPython import display
 from matplotlib import pyplot as plt
-from scipy import stats
 import seaborn
 from CNN import basic
-import os
-import re
-
-
-def return_labels(matriz_path):
-  lista = []
-  labels = []
-  #matriz_path = '/content/gdrive/MyDrive/Dados/Matriz20x150'
-  matrizPaths = os.listdir(matriz_path) #nome dos arquivos
-  for matrix in matrizPaths: #Exemplo: '10-15Maca_3.npy'
-    label = ''.join(i for i in matrix if not i.isdigit()) #Exemplo: '-Maca_.npy'
-    label = ''.join(c for c in label if c not in '-') #Exemplo: 'Maca_.npy'
-    label = ''.join(c for c in label if c not in '_') #Exemplo: 'Maca.npy'
-    label = label.replace('.npy', '') #Exemplo: 'Maca'
-    labels.append(label) #adiciona o item no final da lista
-    lista.append(matrix)
-
-  lb = LabelBinarizer()
-  dados_Y = lb.fit_transform(labels)
-  indices = range(len(labels))
-  return indices, dados_Y, lista
-
-def generate_train(train_X, matriz_path, lista):
-    """
-    Gera dados de treino para a CNN4
-    :parametro train_X: dados de entrada de treino
-    :return: dados de entrada e saída de treino
-    """
-    data = []
-    labels = []
-    idx=train_X
-    matriz_treino = map(lambda i: lista[i], idx)
-    matriz_treino = sorted(matriz_treino, key=lambda x: (int(re.sub('\D','',x)),x))
-    #matriz_path = 'gdrive/My Drive/Dados/Matriz20x150/'
-
-    for matriz in matriz_treino:
-      mat = np.load(matriz_path + '/' + matriz)
-      #mat = scaler.fit_transform(mat)
-      #mat = stats.zscore(mat)
-      one_channel = np.stack((mat,)*1, axis=-1)
-      label = ''.join(i for i in matriz if not i.isdigit()) #Exemplo: '-Maca_.npy'
-      label = ''.join(c for c in label if c not in '-') #Exemplo: 'Maca_.npy'
-      label = ''.join(c for c in label if c not in '_') #Exemplo: 'Maca.npy'
-      label = label.replace('.npy', '') #Exemplo: 'Maca'
-      labels.append(label)
-      data.append(one_channel)
-          
-    x_train = np.array(data, dtype = 'float32')
-    lb = LabelBinarizer()
-    y_train = lb.fit_transform(labels)
-    y_train = np.stack((y_train,)*1, axis=-1)
-    return x_train, y_train
-
-def generate_test(test_X, matriz_path, lista):
-    """
-    Gera dados de teste para a CNN4
-    :parametro test_X: dados de entrada de teste
-    :return: dados de entrada e saída de teste
-    """
-    data = []
-    labels = []
-    idx=test_X
-    matriz_treino = map(lambda i: lista[i], idx)
-    matriz_treino = sorted(matriz_treino, key=lambda x: (int(re.sub('\D','',x)),x))
-    #matriz_path = 'gdrive/My Drive/Dados/Matriz20x150/'
-
-    for matriz in matriz_treino:
-      mat = np.load(matriz_path + '/' + matriz)
-      #mat = scaler.fit_transform(mat)
-      #mat = stats.zscore(mat)
-      one_channel_video = np.stack((mat,)*1, axis=-1)
-      label = ''.join(i for i in matriz if not i.isdigit()) #Exemplo: '-Maca_.npy'
-      label = ''.join(c for c in label if c not in '-') #Exemplo: 'Maca_.npy'
-      label = ''.join(c for c in label if c not in '_') #Exemplo: 'Maca.npy'
-      label = label.replace('.npy', '') #Exemplo: 'Maca'
-      labels.append(label)
-      data.append(one_channel_video)
-          
-    x_test = np.array(data, dtype = 'float32')
-    lb = LabelBinarizer()
-    y_test = lb.fit_transform(labels)
-    y_test = np.stack((y_test,)*1, axis=-1)
-    return x_test, y_test
 
 def initial_population(n, cnn):
     """
@@ -210,7 +124,7 @@ def genotypeCNN1(filters, pool, pool_size, dropout, norm, lags, num_conv, kernel
       'filters': filters, # número de filtros [16,32,64]
       'pool': pool, # probabilidade de pooling [0%, 50%, 100%] 
       'pool_size': pool_size, #tamanho da janela de pooling [2,3,4,5] 
-      'dropout': dropout, # porcentagem dropout (0 a 0.5)
+      'dropout': dropout, # porcentagem dropout (0.5 a 0.8)
       'norm': norm, # normalização (0 - sim, 1 - não)
       'lags': lags, # quantidade de lags [2 - 200]
       'num_conv': num_conv, # número de camadas convolucionais [1 - 6]
@@ -389,50 +303,6 @@ def modelo_CNN3(X_train, y_train, X_test, y_test, individual,epocas):
   
     return model, history
 
-def modelo_CNN4(X_train, y_train, X_test, y_test, individual,epocas):
-    """
-    Cria um modelo CNN4
-    :parametro X_train: dados para treinamento
-    :parametro y_train: rótulo dos dados de treinamento
-    :parametro individual: dicionário com os hiperparâmetros do modelo
-    :return: o modelo
-    """
-    warnings.filterwarnings('ignore')
-    call = [EarlyStopping(monitor='loss', mode='min', patience=15, verbose=1),]
-    if individual['filters'] == 0: 
-        filters = 16
-    elif individual['filters'] == 1:
-        filters = 32
-    else:
-        filters = 64
-    
-    if individual['norm'] == 0:
-        norm = False
-    else:
-        norm = True
-  
-    if individual['kernel_size'] == 0: 
-        kernel_size = 2
-    elif individual['kernel_size'] == 1:
-        kernel_size = 3
-    elif individual['kernel_size'] == 2:
-        kernel_size = 5
-    else:
-        kernel_size = 11
-    
-    d = []
-    for i in range(individual['num_conv']):
-        d.append(2**i)
-    
-    model = compiled_tcn(return_sequences=False, num_feat=150, num_classes=20, nb_filters=filters, kernel_size=kernel_size, dilations=d,
-                         padding='causal', dropout_rate=individual['dropout'], use_batch_norm=True, nb_stacks=individual['pilhas'], max_len=X_train[0:1].shape[1],
-                         use_skip_connections=True)
-    y_train = y_train.squeeze().argmax(axis=1)
-    y_test = y_test.squeeze().argmax(axis=1)
-    history = model.fit(X_train, y_train, epochs=epocas,validation_data=(X_test, y_test), callbacks = call, verbose=0)    
-  
-    return model, history
-
 def evaluation(individual, cnn, series, epocas):
     """
     Avalia os indivíduos da população
@@ -440,7 +310,17 @@ def evaluation(individual, cnn, series, epocas):
     :parametro cnn: tipo da rede
     :parametro series: base de dados
     :return: número de parâmetros do modelo e a média do rmse
-    """ 
+    """
+    windows_size=.5
+    train_size=.7
+    w = int(len(series) * windows_size)
+    d = int(.2 * w)
+    X_train = []
+    y_train = []
+    X_test = []
+    y_test = []
+    i=0
+  
     if individual['filters'] == 0: 
         filters = 16
     elif individual['filters'] == 1:
@@ -450,41 +330,21 @@ def evaluation(individual, cnn, series, epocas):
 
     results = []
     
-    if cnn == 'CNN4':
-      for k in range (0, 3):
-        indices, dados_Y, lista = return_labels(series)
-        # 75% treino - 25% teste
-        (train_X, test_X, train_Y, test_Y) = train_test_split(indices,dados_Y,random_state=42,test_size=0.25,stratify=dados_Y)
-        X_train, y_train = generate_train(train_X, series, lista)
-        X_test, y_test = generate_test(test_X, series, lista)
-        model, history  = modelo_CNN4(X_train, y_train, X_test, y_test, individual, epocas)
-        results.append(np.sqrt(history.history['val_accuracy'][-1]))
-        print(results)
-    else:
-      windows_size=.5
-      train_size=.7
-      w = int(len(series) * windows_size)
-      d = int(.2 * w)
-      X_train = []
-      y_train = []
-      X_test = []
-      y_test = []
-      i=0
-      while i < w:
-          train_index = (series[i:i+int(w*train_size)].index.values.astype(int))
-          test_index = (series[i+int(w*train_size):w+i].index.values.astype(int))
-          train = series[train_index].values
-          test = series[test_index].values
-          X_train, y_train, X_test, y_test = basic.slideWindow(train, test, individual['lags'])
-          
-          if cnn == 'CNN1':
-              model, history  = modelo_CNN1(X_train, y_train, X_test, y_test, individual, epocas)
-          elif cnn == 'CNN2':
-              model, history  = modelo_CNN2(X_train, y_train, X_test, y_test, individual, epocas)
-          else:
-              model, history  = modelo_CNN3(X_train, y_train, X_test, y_test, individual, epocas)
-          results.append(np.sqrt(history.history['val_loss'][-1]))
-          i = i+d
+    while i < w:
+        train_index = (series[i:i+int(w*train_size)].index.values.astype(int))
+        test_index = (series[i+int(w*train_size):w+i].index.values.astype(int))
+        train = series[train_index].values
+        test = series[test_index].values
+        X_train, y_train, X_test, y_test = basic.slideWindow(train, test, individual['lags'])
+        
+        if cnn == 'CNN1':
+            model, history  = modelo_CNN1(X_train, y_train, X_test, y_test, individual, epocas)
+        elif cnn == 'CNN2':
+            model, history  = modelo_CNN2(X_train, y_train, X_test, y_test, individual, epocas)
+        else:
+            model, history  = modelo_CNN3(X_train, y_train, X_test, y_test, individual, epocas)
+        results.append(np.sqrt(history.history['val_loss'][-1]))
+        i = i+d
 
     rmse = np.nanmean(results)
     num_param = model.count_params()
@@ -798,15 +658,10 @@ def genetic(ngen, npop, pcruz, pmut, dataset, cnn, epocas):
         new_populacao = []
     
         pl.subplot(121)
-        if cnn == 'CNN4':
-          h1, = pl.plot(melhor_rmse, c='blue', label='Best ACC')
-          h2, = pl.plot(media_rmse, c='cyan', label='Mean ACC')
-          pl.title("ACC")
-        else:
-          h1, = pl.plot(melhor_rmse, c='blue', label='Best RMSE')
-          h2, = pl.plot(media_rmse, c='cyan', label='Mean RMSE')
-          pl.title("RMSE")
-          pl.legend([h1, h2],['Best','Mean'])
+        h1, = pl.plot(melhor_rmse, c='blue', label='Best RMSE')
+        h2, = pl.plot(media_rmse, c='cyan', label='Mean RMSE')
+        pl.title("RMSE")
+        pl.legend([h1, h2],['Best','Mean'])
 
         pl.subplot(122)
         h3, = pl.plot(melhor_len_lags, c='red', label='Best Número de parâmetros')
@@ -814,7 +669,7 @@ def genetic(ngen, npop, pcruz, pmut, dataset, cnn, epocas):
         pl.title("Número de parâmetros")
         pl.legend([h3, h4],['Best','Mean'])
 
-        display.clear_output(wait=True)
+        #display.clear_output(wait=True)
         display.display(pl.gcf())
 
     melhorT = sorted(populacao, key=lambda item: item['rmse'])[0]
