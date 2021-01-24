@@ -814,7 +814,7 @@ def genetic(ngen, npop, pcruz, pmut, dataset, cnn, epocas):
         pl.title("Número de parâmetros")
         pl.legend([h3, h4],['Best','Mean'])
 
-        #display.clear_output(wait=True)
+        display.clear_output(wait=True)
         display.display(pl.gcf())
 
     melhorT = sorted(populacao, key=lambda item: item['rmse'])[0]
