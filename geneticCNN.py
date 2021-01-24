@@ -458,7 +458,7 @@ def evaluation(individual, cnn, series, epocas):
         X_train, y_train = generate_train(train_X, series, lista)
         X_test, y_test = generate_test(test_X, series, lista)
         model, history  = modelo_CNN4(X_train, y_train, X_test, y_test, individual, epocas)
-        results.append(np.sqrt(history.history['val_loss'][-1]))
+        results.append(np.sqrt(history.history['val_accuracy'][-1]))
         print(results)
     else:
       windows_size=.5
@@ -483,7 +483,7 @@ def evaluation(individual, cnn, series, epocas):
               model, history  = modelo_CNN2(X_train, y_train, X_test, y_test, individual, epocas)
           else:
               model, history  = modelo_CNN3(X_train, y_train, X_test, y_test, individual, epocas)
-          results.append(np.sqrt(history.history['val_accuracy'][-1]))
+          results.append(np.sqrt(history.history['val_loss'][-1]))
           i = i+d
 
     rmse = np.nanmean(results)
