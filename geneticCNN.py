@@ -451,8 +451,8 @@ def evaluation(individual, cnn, series, epocas):
     results = []
     
     if cnn == 'CNN4':
-      indices, dados_Y, lista = return_labels(series)
       for k in range (0, 3):
+        indices, dados_Y, lista = return_labels(series)
         # 75% treino - 25% teste
         (train_X, test_X, train_Y, test_Y) = train_test_split(indices,dados_Y,random_state=42,test_size=0.25,stratify=dados_Y)
         X_train, y_train = generate_train(train_X, series, lista)
