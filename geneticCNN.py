@@ -429,7 +429,7 @@ def modelo_CNN4(X_train, y_train, X_test, y_test, individual,epocas):
                          use_skip_connections=True)
     y_train = y_train.squeeze().argmax(axis=1)
     y_test = y_test.squeeze().argmax(axis=1)
-    history = model.fit(X_train, y_train, epochs=epocas,validation_data=(X_test, y_test), workers=4, use_multiprocessing=True, callbacks = call, verbose=0)    
+    history = model.fit(X_train, y_train, epochs=epocas,validation_data=(X_test, y_test), callbacks = call, verbose=0)    
   
     return model, history
 
